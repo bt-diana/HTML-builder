@@ -7,10 +7,15 @@ const fileNames = Array();
 
 fs.mkdir(newDirPath, { recursive: true });
 
-fs.readdir(dirPath).then((files) => {
+fs.readdir(dirPath, { withFileTypes: true }).then((files) => {
   files.forEach((file) => {
-    fileNames.push(file);
-    fs.copyFile(path.resolve(dirPath, file), path.resolve(newDirPath, file));
+    if (!file.isDirectory()) {
+      fileNames.push(file.name);
+      fs.copyFile(
+        path.resolve(dirPath, file.name),
+        path.resolve(newDirPath, file.name),
+      );
+    }
   });
 });
 
