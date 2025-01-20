@@ -57,3 +57,59 @@ fs.promises.readdir(srcPath, { withFileTypes: true }).then((files) => {
     }
   });
 });
+
+const assetsPath = path.resolve(__dirname, 'assets');
+const distAssetsPath = path.resolve(distPath, 'assets');
+copyFolder(assetsPath, distAssetsPath);
+
+function copyFolder(dirPath, newDirPath) {
+  const fileNames = Array();
+
+  fs.promises.mkdir(newDirPath, { recursive: true });
+
+  fs.promises.readdir(dirPath, { withFileTypes: true }).then((files) => {
+    files.forEach((file) => {
+      fileNames.push(file.name);
+      if (!file.isDirectory()) {
+        fs.promises.copyFile(
+          path.resolve(dirPath, file.name),
+          path.resolve(newDirPath, file.name),
+        );
+      } else {
+        copyFolder(
+          path.resolve(file.path, file.name),
+          path.resolve(newDirPath, file.name),
+        );
+      }
+    });
+  });
+
+  fs.promises.readdir(newDirPath, { withFileTypes: true }).then((files) => {
+    files.forEach((file) => {
+      if (!fileNames.includes(file.name)) {
+        if (!file.isDirectory()) {
+          fs.promises.unlink(path.resolve(file.path, file.name));
+        } else {
+          deleteFolder(path.resolve(file.path, file.name));
+        }
+      }
+    });
+  });
+}
+
+function deleteFolder(folderPath) {
+  fs.promises
+    .readdir(folderPath, { withFileTypes: true })
+    .then((files) => {
+      files.forEach((file) => {
+        if (!file.isDirectory()) {
+          fs.promises.unlink(path.resolve(file.path, file.name));
+        } else {
+          deleteFolder(path.resolve(file.path, file.name));
+        }
+      });
+    })
+    .then(() => {
+      fs.promises.rmdir(folderPath);
+    });
+}
