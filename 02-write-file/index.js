@@ -16,6 +16,7 @@ rl.on('line', (input) => {
     rl.emit('SIGINT');
   } else {
     writeStream.write(input);
+    writeStream.write('\n');
   }
 });
 
