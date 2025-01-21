@@ -67,34 +67,37 @@ function copyFolder(dirPath, newDirPath) {
 
   fs.promises.mkdir(newDirPath, { recursive: true });
 
-  fs.promises.readdir(dirPath, { withFileTypes: true }).then((files) => {
-    files.forEach((file) => {
-      fileNames.push(file.name);
-      if (!file.isDirectory()) {
-        fs.promises.copyFile(
-          path.resolve(dirPath, file.name),
-          path.resolve(newDirPath, file.name),
-        );
-      } else {
-        copyFolder(
-          path.resolve(file.path, file.name),
-          path.resolve(newDirPath, file.name),
-        );
-      }
-    });
-  });
-
-  fs.promises.readdir(newDirPath, { withFileTypes: true }).then((files) => {
-    files.forEach((file) => {
-      if (!fileNames.includes(file.name)) {
+  fs.promises
+    .readdir(dirPath, { withFileTypes: true })
+    .then((files) => {
+      files.forEach((file) => {
+        fileNames.push(file.name);
         if (!file.isDirectory()) {
-          fs.promises.unlink(path.resolve(file.path, file.name));
+          fs.promises.copyFile(
+            path.resolve(dirPath, file.name),
+            path.resolve(newDirPath, file.name),
+          );
         } else {
-          deleteFolder(path.resolve(file.path, file.name));
+          copyFolder(
+            path.resolve(file.path, file.name),
+            path.resolve(newDirPath, file.name),
+          );
         }
-      }
+      });
+    })
+    .then(() => {
+      fs.promises.readdir(newDirPath, { withFileTypes: true }).then((files) => {
+        files.forEach((file) => {
+          if (!fileNames.includes(file.name)) {
+            if (!file.isDirectory()) {
+              fs.promises.unlink(path.resolve(file.path, file.name));
+            } else {
+              deleteFolder(path.resolve(file.path, file.name));
+            }
+          }
+        });
+      });
     });
-  });
 }
 
 function deleteFolder(folderPath) {
