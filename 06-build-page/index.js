@@ -38,7 +38,7 @@ fs.promises.readFile(templatePagePath).then((buffer) => {
 const srcPath = path.resolve(__dirname, 'styles');
 fs.promises.mkdir(distPath, { recursive: true });
 
-const filePath = path.resolve(distPath, 'bundle.css');
+const filePath = path.resolve(distPath, 'style.css');
 const writeStream = fs.createWriteStream(filePath);
 
 fs.promises.readdir(srcPath, { withFileTypes: true }).then((files) => {
